@@ -21,6 +21,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
@@ -41,7 +42,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,9 +58,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @RestClientTest
 public class BeerClientMockTest {
 
-    static final String URL = "http://localhost:8080";
     public static final String BEARER_TEST = "Bearer test";
-
+    static final String URL = "http://localhost:8080";
     BeerClient beerClient;
 
     MockRestServiceServer server;
@@ -81,32 +81,6 @@ public class BeerClientMockTest {
 
     @MockBean
     OAuth2AuthorizedClientManager manager;
-
-    @TestConfiguration
-    @Import(RestTemplateBuilderConfig.class)
-    public static class TestConfig {
-
-        @Bean
-        ClientRegistrationRepository clientRegistrationRepository() {
-            return new InMemoryClientRegistrationRepository(ClientRegistration
-                    .withRegistrationId("springauth")
-                    .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                    .clientId("test")
-                    .tokenUri("test")
-                    .build());
-        }
-
-        @Bean
-        OAuth2AuthorizedClientService auth2AuthorizedClientService(ClientRegistrationRepository clientRegistrationRepository){
-            return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository);
-        }
-
-        @Bean
-        OAuthClientInterceptor oAuthClientInterceptor(OAuth2AuthorizedClientManager manager, ClientRegistrationRepository clientRegistrationRepository){
-            return new OAuthClientInterceptor(manager, clientRegistrationRepository);
-        }
-    }
-
     @Autowired
     ClientRegistrationRepository clientRegistrationRepository;
 
@@ -194,15 +168,15 @@ public class BeerClientMockTest {
     }
 
     @Test
-    void testCreateBeer()  {
+    void testCreateBeer() {
         URI uri = UriComponentsBuilder.fromPath(BeerClientImpl.GET_BEER_BY_ID_PATH)
-                        .build(dto.getId());
+                .build(dto.getId());
 
         server.expect(method(HttpMethod.POST))
-                        .andExpect(requestTo(URL +
-                                BeerClientImpl.GET_BEER_PATH))
-                        .andExpect(header("Authorization", BEARER_TEST))
-                                .andRespond(withAccepted().location(uri));
+                .andExpect(requestTo(URL +
+                        BeerClientImpl.GET_BEER_PATH))
+                .andExpect(header("Authorization", BEARER_TEST))
+                .andRespond(withAccepted().location(uri));
 
         mockGetOperation();
 
@@ -239,18 +213,43 @@ public class BeerClientMockTest {
         assertThat(dtos.getContent().size()).isGreaterThan(0);
     }
 
-    BeerDTO getBeerDto(){
+    BeerDTO getBeerDto() {
         return BeerDTO.builder()
                 .id(UUID.randomUUID())
                 .price(new BigDecimal("10.99"))
-                .beerName("Mango Bobs")
+                .name("Mango Bobs")
                 .beerStyle(BeerStyle.IPA)
                 .quantityOnHand(500)
                 .upc("123245")
                 .build();
     }
 
-    BeerDTOPageImpl getPage(){
-        return new BeerDTOPageImpl(Arrays.asList(getBeerDto()), 1, 25, 1);
+    BeerDTOPageImpl getPage() {
+        return new BeerDTOPageImpl(Collections.singletonList(getBeerDto()), PageRequest.of(0, 25), 1);
+    }
+
+    @TestConfiguration
+    @Import(RestTemplateBuilderConfig.class)
+    public static class TestConfig {
+
+        @Bean
+        ClientRegistrationRepository clientRegistrationRepository() {
+            return new InMemoryClientRegistrationRepository(ClientRegistration
+                    .withRegistrationId("springauth")
+                    .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                    .clientId("test")
+                    .tokenUri("test")
+                    .build());
+        }
+
+        @Bean
+        OAuth2AuthorizedClientService auth2AuthorizedClientService(ClientRegistrationRepository clientRegistrationRepository) {
+            return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository);
+        }
+
+        @Bean
+        OAuthClientInterceptor oAuthClientInterceptor(OAuth2AuthorizedClientManager manager, ClientRegistrationRepository clientRegistrationRepository) {
+            return new OAuthClientInterceptor(manager, clientRegistrationRepository);
+        }
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 /**
@@ -23,7 +24,7 @@ public class RestTemplateBuilderConfig {
 
     @Bean
     OAuth2AuthorizedClientManager auth2AuthorizedClientManager(ClientRegistrationRepository clientRegistrationRepository,
-                                                               OAuth2AuthorizedClientService oAuth2AuthorizedClientService ){
+                                                               OAuth2AuthorizedClientService oAuth2AuthorizedClientService) {
         var authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
                 .clientCredentials()
                 .build();
@@ -37,12 +38,17 @@ public class RestTemplateBuilderConfig {
 
     @Bean
     RestTemplateBuilder restTemplateBuilder(RestTemplateBuilderConfigurer configurer,
-                                            OAuthClientInterceptor interceptor){
+                                            OAuthClientInterceptor interceptor) {
 
         assert rootUrl != null;
 
         return configurer.configure(new RestTemplateBuilder())
                 .additionalInterceptors(interceptor)
                 .uriTemplateHandler(new DefaultUriBuilderFactory(rootUrl));
+    }
+
+    @Bean
+    public RestClient.Builder restClientBuilder(RestTemplateBuilder restTemplateBuilder) {
+        return RestClient.builder(restTemplateBuilder.build());
     }
 }

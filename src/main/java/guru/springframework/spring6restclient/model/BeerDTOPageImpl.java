@@ -9,25 +9,31 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-/**
- * Created by jt, Spring Framework Guru.
- */
-@JsonIgnoreProperties(ignoreUnknown = true, value = "pageable")
-public class BeerDTOPageImpl<BeerDTO> extends PageImpl<guru.springframework.spring6restclient.model.BeerDTO> {
+@JsonIgnoreProperties(value = "pageable", ignoreUnknown = true)
+public class BeerDTOPageImpl extends PageImpl<BeerDTO> {
 
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public BeerDTOPageImpl(@JsonProperty("content")  List<guru.springframework.spring6restclient.model.BeerDTO> content,
-                           @JsonProperty("number") int page,
-                           @JsonProperty("size") int size,
-                           @JsonProperty("totalElements") long total) {
-        super(content, PageRequest.of(page, size), total);
-    }
-
-    public BeerDTOPageImpl(List<guru.springframework.spring6restclient.model.BeerDTO> content, Pageable pageable, long total) {
+    public BeerDTOPageImpl(List<BeerDTO> content, Pageable pageable, long total) {
         super(content, pageable, total);
     }
 
-    public BeerDTOPageImpl(List<guru.springframework.spring6restclient.model.BeerDTO> content) {
-        super(content);
+    @JsonCreator
+    public BeerDTOPageImpl(
+            @JsonProperty("content") List<BeerDTO> content,
+            @JsonProperty("page") PageDetails pageDetails
+    ) {
+        super(content, PageRequest.of(pageDetails.number(), pageDetails.size()), pageDetails.totalElements());
+    }
+
+    public record PageDetails(int size, int number, long totalElements) {
+        @JsonCreator
+        public PageDetails(
+                @JsonProperty("size") int size,
+                @JsonProperty("number") int number,
+                @JsonProperty("totalElements") long totalElements
+        ) {
+            this.size = size;
+            this.number = number;
+            this.totalElements = totalElements;
+        }
     }
 }

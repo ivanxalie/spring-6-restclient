@@ -24,7 +24,7 @@ class BeerClientImplTest {
     void testDeleteBeer() {
         BeerDTO newDto = BeerDTO.builder()
                 .price(new BigDecimal("10.99"))
-                .beerName("Mango Bobs 2")
+                .name("Mango Bobs 2")
                 .beerStyle(BeerStyle.IPA)
                 .quantityOnHand(500)
                 .upc("123245")
@@ -45,7 +45,7 @@ class BeerClientImplTest {
 
         BeerDTO newDto = BeerDTO.builder()
                 .price(new BigDecimal("10.99"))
-                .beerName("Mango Bobs 2")
+                .name("Mango Bobs 2")
                 .beerStyle(BeerStyle.IPA)
                 .quantityOnHand(500)
                 .upc("123245")
@@ -54,10 +54,10 @@ class BeerClientImplTest {
         BeerDTO beerDto = beerClient.createBeer(newDto);
 
         final String newName = "Mango Bobs 3";
-        beerDto.setBeerName(newName);
+        beerDto.setName(newName);
         BeerDTO updatedBeer = beerClient.updateBeer(beerDto);
 
-        assertEquals(newName, updatedBeer.getBeerName());
+        assertEquals(newName, updatedBeer.getName());
     }
 
     @Test
@@ -65,7 +65,7 @@ class BeerClientImplTest {
 
         BeerDTO newDto = BeerDTO.builder()
                 .price(new BigDecimal("10.99"))
-                .beerName("Mango Bobs")
+                .name("Mango Bobs")
                 .beerStyle(BeerStyle.IPA)
                 .quantityOnHand(500)
                 .upc("123245")
