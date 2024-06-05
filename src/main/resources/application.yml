@@ -25,3 +25,8 @@ spring:
 rest:
   template:
     rootUrl: http://localhost:8080
+
+logging:
+  level:
+    guru.springframework: debug
+    org.zalando.logbook: trace
